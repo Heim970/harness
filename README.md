@@ -43,6 +43,13 @@ llm-test-harness/
   outputs/
 ```
 
+## env 파일 구조
+
+```plain text
+GEMINI_API_KEY={gemini_api_key}
+GEMINI_MODEL=gemini-3.1-flash-lite-preview
+```
+
 ## Tech Stack
 
 - Python
