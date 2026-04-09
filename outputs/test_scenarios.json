@@ -1,0 +1,65 @@
+{
+  "feature_name": "회원 가입 기능",
+  "summary": "UserService의 register 메서드에 대한 단위 테스트 시나리오",
+  "test_cases": [
+    {
+      "id": "TC-001",
+      "title": "정상 회원 가입 성공",
+      "category": "normal",
+      "preconditions": [
+        "userRepository.existsByEmail이 false를 반환하도록 설정",
+        "passwordEncoder.encode가 암호화된 문자열을 반환하도록 설정"
+      ],
+      "steps": [
+        "유효한 email, 8자 이상의 password, nickname으로 register 호출"
+      ],
+      "expected_result": "저장된 User 객체가 반환되며, userRepository.save가 호출됨",
+      "priority": "high"
+    },
+    {
+      "id": "TC-002",
+      "title": "이메일 누락 시 예외 발생",
+      "category": "boundary",
+      "preconditions": [
+        "userRepository 및 passwordEncoder는 호출되지 않음"
+      ],
+      "steps": [
+        "email을 null 또는 빈 문자열로 설정하여 register 호출"
+      ],
+      "expected_result": "IllegalArgumentException(email is required) 발생",
+      "priority": "high"
+    },
+    {
+      "id": "TC-003",
+      "title": "비밀번호 8자 미만 시 예외 발생",
+      "category": "boundary",
+      "preconditions": [
+        "userRepository 및 passwordEncoder는 호출되지 않음"
+      ],
+      "steps": [
+        "7자 길이의 password로 register 호출"
+      ],
+      "expected_result": "IllegalArgumentException(password too short) 발생",
+      "priority": "high"
+    },
+    {
+      "id": "TC-004",
+      "title": "중복 이메일 가입 시 예외 발생",
+      "category": "exception",
+      "preconditions": [
+        "userRepository.existsByEmail이 true를 반환하도록 설정"
+      ],
+      "steps": [
+        "이미 존재하는 email로 register 호출"
+      ],
+      "expected_result": "IllegalStateException(duplicate email) 발생",
+      "priority": "high"
+    }
+  ],
+  "missing_risks": [
+    "이메일 형식 유효성 검사(Regex) 부재",
+    "비밀번호 복잡도(특수문자, 숫자 포함 등) 정책 부재",
+    "닉네임 길이 제한 및 특수문자 허용 여부 정책 부재",
+    "데이터베이스 저장 실패 시 예외 처리(Transaction 관리)"
+  ]
+}

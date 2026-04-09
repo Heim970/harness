@@ -1,0 +1,9 @@
+회원 가입 기능
+
+- email, password, nickname으로 가입
+- email은 중복 불가
+- password는 8자 이상
+
+테스트 코드는 JUnit5 + Mockito 단위 테스트 기준으로 생성한다.
+
+아래 Java 코드 참고:

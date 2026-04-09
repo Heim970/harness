@@ -1,0 +1,24 @@
+{
+  "score": 92,
+  "strengths": [
+    "JUnit5와 Mockito를 활용한 표준적인 단위 테스트 구조를 잘 따름",
+    "Mockito의 @ExtendWith와 @InjectMocks를 사용하여 깔끔한 의존성 주입 구현",
+    "예외 상황(경계값, 중복)에 대한 테스트가 명확하게 분리되어 있음",
+    "verifyNoInteractions 및 never()를 사용하여 불필요한 호출 방지 검증이 정확함"
+  ],
+  "weaknesses": [
+    "예외 메시지 검증이 누락됨 (assertThrows에서 예외 타입만 확인하고 메시지는 확인하지 않음)",
+    "lenient() 사용은 테스트 설계가 다소 느슨하다는 신호일 수 있음 (setUp에서 불필요한 stubbing 방지 권장)",
+    "User 객체의 생성자나 필드에 대한 검증이 최소한으로 이루어짐"
+  ],
+  "missing_cases": [
+    "예외 발생 시 던져지는 메시지 내용 검증 (assertThrows의 결과값을 통한 메시지 확인)",
+    "비밀번호가 정확히 8자인 경우(경계값 분석)에 대한 테스트"
+  ],
+  "suggested_fixes": [
+    "assertThrows를 사용할 때, 예외 객체를 반환받아 assertEquals(expectedMessage, exception.getMessage())를 추가하여 메시지까지 검증할 것",
+    "setUp에서 lenient()를 제거하고, 각 테스트 케이스에서 필요한 stubbing만 명시적으로 수행하여 테스트 격리성을 높일 것",
+    "비밀번호 8자 경계값 테스트(7자 실패, 8자 성공)를 추가하여 경계값 분석(Boundary Value Analysis)을 강화할 것"
+  ],
+  "is_good_enough": true
+}

@@ -1,0 +1,53 @@
+{
+  "package_name": "com.example.service",
+  "class_name": "UserServiceTest",
+  "imports": [
+    "org.junit.jupiter.api.Test",
+    "org.junit.jupiter.api.extension.ExtendWith",
+    "org.mockito.InjectMocks",
+    "org.mockito.Mock",
+    "org.mockito.junit.jupiter.MockitoExtension",
+    "org.springframework.security.crypto.password.PasswordEncoder",
+    "static org.junit.jupiter.api.Assertions.*",
+    "static org.mockito.ArgumentMatchers.any",
+    "static org.mockito.Mockito.*"
+  ],
+  "setup_fields": [
+    "@Mock private UserRepository userRepository;\n@Mock private PasswordEncoder passwordEncoder;\n@InjectMocks private UserService userService;"
+  ],
+  "setup_method": "lenient().when(passwordEncoder.encode(anyString())).thenReturn(\"encodedPassword\");",
+  "test_methods": [
+    {
+      "method_name": "register_Success",
+      "display_name": "정상 회원 가입 성공",
+      "tags": [
+        "normal"
+      ],
+      "code": "@Test\nvoid register_Success() {\n    String email = \"test@test.com\";\n    String password = \"password123\";\n    String nickname = \"tester\";\n    User user = new User(email, \"encodedPassword\", nickname);\n    when(userRepository.existsByEmail(email)).thenReturn(false);\n    when(userRepository.save(any(User.class))).thenReturn(user);\n\n    User result = userService.register(email, password, nickname);\n\n    assertNotNull(result);\n    assertEquals(email, result.getEmail());\n    verify(userRepository, times(1)).save(any(User.class));\n}"
+    },
+    {
+      "method_name": "register_ThrowsException_WhenEmailIsBlank",
+      "display_name": "이메일 누락 시 예외 발생",
+      "tags": [
+        "boundary"
+      ],
+      "code": "@Test\nvoid register_ThrowsException_WhenEmailIsBlank() {\n    assertThrows(IllegalArgumentException.class, () -> userService.register(\"\", \"password123\", \"nick\"));\n    assertThrows(IllegalArgumentException.class, () -> userService.register(null, \"password123\", \"nick\"));\n    verifyNoInteractions(userRepository);\n}"
+    },
+    {
+      "method_name": "register_ThrowsException_WhenPasswordTooShort",
+      "display_name": "비밀번호 8자 미만 시 예외 발생",
+      "tags": [
+        "boundary"
+      ],
+      "code": "@Test\nvoid register_ThrowsException_WhenPasswordTooShort() {\n    assertThrows(IllegalArgumentException.class, () -> userService.register(\"test@test.com\", \"1234567\", \"nick\"));\n    verifyNoInteractions(userRepository);\n}"
+    },
+    {
+      "method_name": "register_ThrowsException_WhenEmailDuplicate",
+      "display_name": "중복 이메일 가입 시 예외 발생",
+      "tags": [
+        "exception"
+      ],
+      "code": "@Test\nvoid register_ThrowsException_WhenEmailDuplicate() {\n    String email = \"test@test.com\";\n    when(userRepository.existsByEmail(email)).thenReturn(true);\n\n    assertThrows(IllegalStateException.class, () -> userService.register(email, \"password123\", \"nick\"));\n    verify(userRepository, never()).save(any(User.class));\n}"
+    }
+  ]
+}
