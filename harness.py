@@ -10,9 +10,6 @@ from google.genai import errors as genai_errors
 from pydantic import ValidationError
 from dotenv import load_dotenv
 
-from prompts import SYSTEM_PROMPT, build_user_prompt
-from schemas import TestScenarioSet
-
 from prompts import (
     SYSTEM_PROMPT,
     build_user_prompt,
@@ -41,7 +38,6 @@ MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
 class HarnessError(Exception):
     """Harness 실행 중 발생하는 예외"""
-    pass
 
 
 class RetryableLLMError(Exception):
@@ -50,7 +46,6 @@ class RetryableLLMError(Exception):
     - 429: Rate limit / quota error
     - 5xx: 서버 과부하, 일시 장애
     """
-    pass
 
 
 def call_llm_for_json(system_prompt: str, user_prompt: str) -> str:
@@ -79,7 +74,7 @@ def call_llm_for_json(system_prompt: str, user_prompt: str) -> str:
     except genai_errors.ServerError as e:
         # 5xx: 서버 과부하, 일시 장애 -> 재시도 대상
         raise RetryableLLMError(f"Server error: {e}") from e
-    
+
     except genai_errors.ClientError as e:
         # 429: 재시도 대상
         message = str(e)
@@ -108,10 +103,10 @@ def generate_with_retry(
 
             json_text = extract_json(raw)
             data = json.loads(json_text)
-            
+
             if schema_cls is TestScenarioSet:
                 data = normalize_test_case_values(data)
-            
+
             if normalizer is not None:
                 data = normalizer(data)
 
@@ -309,7 +304,7 @@ def normalize_stabilized_java_result(data: dict) -> dict:
         data["changes_summary"] = [data["changes_summary"]]
     elif "changes_summary" not in data:
         data["changes_summary"] = []
-    
+
     return data
 
 

@@ -25,6 +25,7 @@ TYPE RULES:
 
 
 def build_user_prompt(feature_text: str) -> str:
+    """유저 프롬프트 생성"""
     return f"""
 Generate a backend test scenario set for the following Spring feature.
 
@@ -80,6 +81,7 @@ OUTPUT RULES:
 
 
 def build_junit_prompt(feature_text: str, scenario_json: dict) -> str:
+    """JUnit 테스트코드 작성 프롬프트"""
     scenario_text = json.dumps(scenario_json, ensure_ascii=False, indent=2)
 
     return f"""
@@ -133,6 +135,7 @@ RULES:
 
 
 def build_stabilize_prompt(feature_text: str, generated_java_code: str) -> str:
+    """테스트코드 안정화 프롬프트"""
     return f"""
 Stabilize the following generated Java test code.
 
@@ -164,8 +167,7 @@ SCORING RULES:
 
 
 def build_quality_prompt(feature_text: str, scenarios_json: dict, java_code: str) -> str:
-    import json
-
+    """테스트코드 품질 향상 프롬프트"""
     scenario_text = json.dumps(scenarios_json, ensure_ascii=False, indent=2)
 
     return f"""
