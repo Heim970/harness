@@ -35,6 +35,8 @@ T = TypeVar("T")
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
+IMPORTANT_KEYWORDS = ["Service", "Repository", "Controller", "User", "feature"]
+
 
 class HarnessError(Exception):
     """Harness 실행 중 발생하는 예외"""
@@ -67,7 +69,7 @@ def call_llm_for_json(system_prompt: str, user_prompt: str) -> str:
             contents=contents,
             config={
                 "temperature": 0.2,
-            }
+            },
         )
         return response.text or ""
 
@@ -125,8 +127,7 @@ def save_result(result: TestScenarioSet, output_path: str) -> None:
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
-        result.model_dump_json(indent=2, ensure_ascii=False),
-        encoding="utf-8"
+        result.model_dump_json(indent=2, ensure_ascii=False), encoding="utf-8"
     )
 
 
@@ -137,7 +138,7 @@ def run(feature_text: str) -> TestScenarioSet:
         schema_cls=TestScenarioSet,
         system_prompt=SYSTEM_PROMPT,
         user_prompt=user_prompt,
-        max_retries=2
+        max_retries=2,
     )
     return result
 
@@ -247,11 +248,12 @@ def normalize_junit_result(data: dict) -> dict:
     return data
 
 
-def run_junit_generation(feature_text: str, scenario_result: TestScenarioSet) -> GeneratedJUnitTest:
+def run_junit_generation(
+    feature_text: str, scenario_result: TestScenarioSet
+) -> GeneratedJUnitTest:
     """JUnit 테스트코드 생성"""
     user_prompt = build_junit_prompt(
-        feature_text=feature_text,
-        scenario_json=scenario_result.model_dump()
+        feature_text=feature_text, scenario_json=scenario_result.model_dump()
     )
 
     result = generate_with_retry(
@@ -357,3 +359,22 @@ def run_quality_check(
         normalizer=normalize_quality_result,
     )
     return result
+
+
+def load_project_context(project_dir: str) -> str:
+    """프로젝트 폴더를 읽어 컨텍스트에 추가"""
+    base = Path(project_dir)
+    parts = []
+
+    for path in sorted(base.rglob("*")):
+        if not path.is_file():
+            continue
+        if path.suffix not in [".java", ".txt"]:
+            continue
+        if not any(keyword in path.name for keyword in IMPORTANT_KEYWORDS):
+            continue
+
+        content = path.read_text(encoding="utf-8")
+        parts.append(f"\n[FILE: {path.name}]\n{content}")
+
+    return "\n".join(parts)

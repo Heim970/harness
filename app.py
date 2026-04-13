@@ -6,18 +6,11 @@ from harness import (
     run_quality_check,
     save_result,
     render_junit_java,
+    load_project_context,
 )
 
 if __name__ == "__main__":
-    feature_text = Path("samples/feature.txt").read_text(encoding="utf-8")
-    code_text = Path("samples/service.java").read_text(encoding="utf-8")
-
-    COMBINED_INPUT = f"""
-{feature_text}
-
-[CODE]
-{code_text}
-"""
+    COMBINED_INPUT = load_project_context("samples/project")
 
     # 1) 테스트 시나리오 생성
     scenario_result = run(COMBINED_INPUT)
@@ -38,8 +31,7 @@ if __name__ == "__main__":
     stabilized_result = run_java_stabilization(COMBINED_INPUT, JAVA_CODE)
     save_result(stabilized_result, "outputs/stabilized_junit_test.json")
     Path("outputs/UserServiceTest.stabilized.java").write_text(
-        stabilized_result.code,
-        encoding="utf-8"
+        stabilized_result.code, encoding="utf-8"
     )
     print("Saved to outputs/stabilized_junit_test.json")
     print("Saved to outputs/UserServiceTest.stabilized.java")
