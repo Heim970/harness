@@ -68,6 +68,87 @@ GEMINI_MODEL=gemini-3.1-flash-lite-preview
 
 ## Example Flow
 
+```mermaid
+flowchart LR
+    A[app.py] --> B[harness.py facade]
+
+    B --> C[context_loader.py]
+    B --> D[runner.py]
+    B --> E[storage.py]
+    B --> F[renderer.py]
+
+    D --> G[prompts.py]
+    D --> H[generator.py]
+    H --> I[llm_client.py]
+    H --> J[json_utils.py]
+    H --> K[normalizers.py]
+    H --> L[schemas.py]
+
+    I --> M[Gemini API]
+
+    D --> N[TestScenarioSet]
+    D --> O[GeneratedJUnitTest]
+    D --> P[StabilizedJavaTest]
+    D --> Q[QualityCheckResult]
+```
+
+<details>
+<summary>Detailed Flow</summary>
+
+```mermaid
+flowchart TD
+    A[app.py 실행] --> B[load_project_context]
+    B --> C[run]
+    C --> D[build_user_prompt]
+    D --> E[generate_with_retry]
+    E --> F[call_llm_for_json]
+    F --> G[Gemini API]
+    G --> F
+    F --> H[extract_json]
+    H --> I[json.loads]
+    I --> J[normalize_test_case_values]
+    J --> K[TestScenarioSet 검증]
+    K --> L[scenario_result 저장]
+    L --> M[run_junit_generation]
+    M --> N[build_junit_prompt]
+    N --> O[generate_with_retry]
+    O --> P[call_llm_for_json]
+    P --> Q[Gemini API]
+    Q --> P
+    P --> R[extract_json]
+    R --> S[json.loads]
+    S --> T[normalize_junit_result]
+    T --> U[GeneratedJUnitTest 검증]
+    U --> V[junit_result 저장]
+    V --> W[render_junit_java]
+    W --> X[UserServiceTest.java 저장]
+    X --> Y[run_java_stabilization]
+    Y --> Z[build_stabilize_prompt]
+    Z --> AA[generate_with_retry]
+    AA --> AB[call_llm_for_json]
+    AB --> AC[Gemini API]
+    AC --> AB
+    AB --> AD[extract_json]
+    AD --> AE[json.loads]
+    AE --> AF[normalize_stabilized_java_result]
+    AF --> AG[StabilizedJavaTest 검증]
+    AG --> AH[stabilized 결과 저장]
+    AH --> AI[stabilized java 파일 저장]
+    AI --> AJ[run_quality_check]
+    AJ --> AK[build_quality_prompt]
+    AK --> AL[generate_with_retry]
+    AL --> AM[call_llm_for_json]
+    AM --> AN[Gemini API]
+    AN --> AM
+    AM --> AO[extract_json]
+    AO --> AP[json.loads]
+    AP --> AQ[normalize_quality_result]
+    AQ --> AR[QualityCheckResult 검증]
+    AR --> AS[quality report 저장]
+```
+
+</details>
+
 Input:
 
 - Spring `UserService.register()` method
